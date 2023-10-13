@@ -1,0 +1,34 @@
+---
+- hosts: apic
+  connection: local
+  gather_facts: False
+  ignore_errors: yes
+
+  vars:
+
+    login_info: &login_info
+      host: "{{ inventory_hostname }}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+      validate_certs: false
+
+    #######################
+    tenant: "TN-ANSIBLE-IAC"
+    vrf:    "VRF-ANSIBLE-IAC"
+    bd:     "BD-ANSIBLE-IAC" 
+    #######################
+
+  tasks:
+    - name: Bridge Domain Section
+      aci_bd:
+          <<: *login_info
+          tenant:                 "{{ tenant }}"
+          bd:                     "{{ bd }}"
+          description:            "ANSIBLE_DESCR"
+          l2_unknown_unicast:     "flood"
+          arp_flooding:           "true"
+          endpoint_clear:         "yes"
+          enable_routing:         "false"
+          vrf:                    "{{ vrf }}"
+          state:                  present
+      

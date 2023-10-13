@@ -1,0 +1,50 @@
+---
+- hosts: apic
+  connection: local
+  gather_facts: False
+  ignore_errors: yes
+
+  vars:
+
+    login_info: &login_info
+      host: "{{ inventory_hostname }}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+      validate_certs: false
+
+    #######################
+    tenant: "TN-ANSIBLE-IAC"
+    vrf:    "VRF-ANSIBLE-IAC"
+    bd:     "BD-ANSIBLE-IAC" 
+    #######################
+
+  tasks:
+    - name: Add a new tenant
+      cisco.aci.aci_tenant:
+          <<: *login_info
+          tenant: "{{ tenant }}"
+          description: opt. tenant descr.
+          state: present
+  
+    - name: Add a new VRF to a tenant
+      cisco.aci.aci_vrf:
+          <<: *login_info
+          vrf: "{{ vrf }}"
+          tenant: "{{ tenant }}"
+          descr: opt. tenant descr.
+          policy_control_preference: enforced
+          policy_control_direction: ingress
+          state: present
+    
+    - name: Add a new BD
+      cisco.aci.aci_bd:
+          <<: *login_info
+          tenant:                 "{{ tenant }}"
+          bd:                     "{{ bd }}"
+          description:            "ANSIBLE_DESCR"
+          l2_unknown_unicast:     "flood"
+          arp_flooding:           "true"
+          endpoint_clear:         "yes"
+          enable_routing:         "false"
+          vrf:                    "{{ vrf }}"
+          state:                  present

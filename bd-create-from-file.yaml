@@ -1,0 +1,30 @@
+---
+- hosts: apic
+  connection: local
+  gather_facts: False
+  ignore_errors: yes
+
+  vars:
+    contents: "{{ lookup('file', './bd.txt') }}"
+    lines: "{{ contents.split('\n') }}"
+    login_info: &login_info
+      host: "{{ inventory_hostname }}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+      validate_certs: false
+  tasks: 
+    - name: Bridge Domain Section
+      aci_bd:
+          <<: *login_info
+          tenant:                 "{{ item.split(',')[2] }}"
+          bd:                     "{{ item.split(',')[0] }}"
+          description:            "{{ item.split(',')[1] }}"
+          l2_unknown_unicast:     "flood"
+          arp_flooding:           "true"
+          endpoint_clear:         "yes"
+          enable_routing:         "false"
+          vrf:                    "{{ item.split(',')[3] }}"
+          state:                  present
+      with_items:
+        - "{{ lines }}"
+

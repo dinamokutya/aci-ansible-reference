@@ -1,0 +1,33 @@
+---
+- hosts: apic
+  connection: local
+  gather_facts: False
+  ignore_errors: yes
+
+  vars:
+
+    login_info: &login_info
+      host: "{{ inventory_hostname }}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+      validate_certs: false
+
+  tasks:
+    - name: Query all EPGs
+      cisco.aci.aci_epg:
+        <<: *login_info
+        state: query
+      register: query_result
+
+    - name: Output to screen
+      ansible.builtin.debug:
+        msg: "{{ query_result | json_query(jamesquery) }}"
+      vars:
+        jamesquery: "current[*].fvAEPg.attributes.name"
+    
+    - name: Reroute the output to a file
+      ansible.builtin.copy:
+        content: "{{ query_result | json_query(jamesquery) }}"
+        dest: "./fvAEPg.list"
+      vars:
+        jamesquery: "current[*].fvAEPg.attributes.name"

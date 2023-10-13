@@ -1,0 +1,12 @@
+    
+    # Name of the application:
+    app_id: "ticketing01"
+    
+    # Name of ACI tenant (must be existing)
+    tenant:    "TN-ANDRISKA"
+   
+    # Name of BD for EPGs (must be existing)
+    bd:     "BD-APP" 
+   
+    # Name of the DVS in VMware (must be existing)
+    vmm_dom: "ACI-DVS2"

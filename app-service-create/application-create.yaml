@@ -1,0 +1,62 @@
+---
+- hosts: apic
+  connection: local
+  gather_facts: False
+  ignore_errors: yes
+
+  vars:
+
+    login_info: &login_info
+      host: "{{ inventory_hostname }}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+      validate_certs: false
+
+    #######################
+
+    #######################
+  vars_files:
+    - ext_vars.yaml
+
+  tasks:
+    - name: Add a new AP
+      cisco.aci.aci_ap:
+        <<: *login_info
+        tenant: "{{ tenant }}"
+        ap: "AP-{{ app_id }}"
+        description: default ap
+        monitoring_policy: default
+        state: present
+      delegate_to: localhost
+    - name: Create EPG
+      cisco.aci.aci_epg:
+        <<: *login_info
+        tenant: "{{ tenant }}"
+        ap: "AP-{{ app_id }}"
+        epg: "{{ item.epg }}"
+        description: "{{ app_id }}-EPG"
+        bd: "{{ item.bd }}"
+        priority: unspecified
+        intra_epg_isolation: unenforced
+        state: present
+      delegate_to: localhost
+      with_items:
+        - epg: "EPG-FRONT-{{ app_id }}"
+          bd: "{{ bd }}"
+        - epg: "EPG-BACK-{{ app_id }}"
+          bd: "{{ bd }}"
+    - name: Add VMM domain to EPGs binding
+      cisco.aci.aci_epg_to_domain:
+        <<: *login_info
+        tenant: "{{ tenant }}"
+        ap: "AP-{{ app_id }}"
+        epg: "{{ item.epg }}"
+        domain: "{{ vmm_dom }}"
+        domain_type: vmm
+        vm_provider: vmware
+        state: present
+      delegate_to: localhost
+      with_items:
+        - epg: "EPG-FRONT-{{ app_id }}"
+        - epg: "EPG-BACK-{{ app_id }}"
+  
