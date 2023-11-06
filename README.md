@@ -11,7 +11,7 @@ BDs created form bd.txt csv file
 
 
 ### epg-query.yaml
-Gets the list of configured EPGs and exports to a file: fvAEPg.list. Gets full EPG json output, ansible parses the json picks name fields, displays the list and saves to a file
+Gets the list of configured EPGs and exports to a file: fvAEPg.list. 
 Parsing json variable with jamesquery
 
 ### epg-query-nati.yaml
