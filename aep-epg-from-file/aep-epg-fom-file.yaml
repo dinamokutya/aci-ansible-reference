@@ -1,0 +1,28 @@
+---
+- hosts: apic
+  connection: local
+  gather_facts: False
+  ignore_errors: yes
+
+  vars:
+    contents: "{{ lookup('file', './epgs.txt') }}"
+    lines: "{{ contents.split('\n') }}"
+    login_info: &login_info
+      host: "{{ inventory_hostname }}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+      validate_certs: false
+
+  tasks:
+    - name: Associate EPG with AEP
+      cisco.aci.aci_aep_to_epg:
+        <<: *login_info
+        aep: AEP-PHY2
+        tenant: TN-ANDRISKA-IAC
+        ap: AP-1
+        epg: "{{ item.split(',')[1] }}"
+        encap_id: "{{ item.split(',')[0] }}"
+        interface_mode: trunk
+        state: present
+      with_items:
+        - "{{ lines }}"
