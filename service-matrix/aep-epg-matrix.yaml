@@ -1,0 +1,40 @@
+---
+- hosts: apic
+  connection: local
+  gather_facts: False
+  ignore_errors: yes
+
+  vars:
+    contents: "{{ lookup('file', './epgs.csv') }}"
+    lines: "{{ contents.split('\n') }}"
+    aeps: "{{ lines[0].split(';') | select('match','^AEP') }}"
+    AEPoffset: "7"
+    login_info: &login_info
+      host: "{{ inventory_hostname }}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+      validate_certs: false
+
+  tasks:
+    - name: Testing nested loops
+      debug:
+        msg: "first {{ item[0] }} second {{ item[1] }} "
+      with_nested:
+        - "{{ aeps }}"
+        - "{{ aeps }}"
+      
+    
+    - name: Associate EPG with AEP
+      cisco.aci.aci_aep_to_epg:
+        <<: *login_info
+        aep: "{{ item[0] }}"
+        tenant: "{{ item[1].split(';')[3] }}"
+        ap: "{{ item[1].split(';')[5] }}"
+        epg: "{{ item[1].split(';')[1] }}"
+        encap_id: "{{ item[1].split(';')[0] }}"
+        interface_mode: trunk
+        state: absent
+      with_nested:
+        - "{{ aeps }}"
+        - "{{ lines }}"
+      when: item[1].split(';')[ lookup('ansible.utils.index_of', aeps , 'eq', item[0])+7 ] == "x"
