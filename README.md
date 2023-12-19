@@ -20,3 +20,7 @@ parsing json variable native ansible nested variable reference
 
 ### app-service-create
 Creates a complete DC network service for a two tier application. Creates Frontend and Backend EPG both EPGs added to vmware DVS. Input parameers stored in the ext_vars vile: App Name or **App ID**, **Tenant**, **Bridge domain** name and the name of the **DVS** in VMware
+
+
+### service-matrix
+Confugures EPG extension on an AEP when "x" -mark present in the datafile. 
