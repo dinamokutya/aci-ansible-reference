@@ -1,0 +1,7 @@
+[apic]
+10.x.x.x
+
+[apic:vars]
+ansible_connection = local
+ansible_username = admin
+ansible_password = xxxx
