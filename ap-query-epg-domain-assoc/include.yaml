@@ -1,0 +1,34 @@
+
+- name: Query an EPG
+  cisco.aci.aci_epg:
+    host: "{{ inventory_hostname }}"
+    username: "{{ ansible_username }}"
+    password: "{{ ansible_password }}"
+    validate_certs: false
+    state: query
+    tenant: "{{ tenant }}"
+    epg: "{{ item.split(',')[0] }}"
+  delegate_to: localhost
+  register: query_result
+
+- name: set fact    
+  set_fact: 
+    ap: "{{ query_result.current[0].fvTenant.children[0].fvAp.attributes.name }}"
+
+- name: print
+  debug:
+    msg: "{{ item.split(',')[0] }} ; {{ ap }}"
+
+- name: Add a new vmm domain to EPG binding
+  cisco.aci.aci_epg_to_domain:
+    host: "{{ inventory_hostname }}"
+    username: "{{ ansible_username }}"
+    password: "{{ ansible_password }}"
+    tenant: "{{ tenant }}"
+    ap: "{{ ap }}"
+    epg: "{{ item.split(',')[0] }}"
+    domain: "{{ domain }}"
+    domain_type: vmm
+    vm_provider: "{{ provider }}"
+    state: present
+  delegate_to: localhost
